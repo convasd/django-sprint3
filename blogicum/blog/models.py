@@ -1,10 +1,11 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
+from django.conf import settings
 
 User = get_user_model()
 
 
-class BaseModel(models.Model):
+class AbstractPublishableModel(models.Model):
     is_published = models.BooleanField(
         verbose_name='Опубликовано',
         default=True,
@@ -20,15 +21,16 @@ class BaseModel(models.Model):
         abstract = True
 
 
-class Category(BaseModel):
-    title = models.CharField(verbose_name='Заголовок', max_length=256)
+class Category(AbstractPublishableModel):
+    title = models.CharField(
+        verbose_name='Заголовок', max_length=settings.LENGTH_256)
     description = models.TextField(verbose_name='Описание')
     slug = models.SlugField(
         verbose_name='Идентификатор',
-        max_length=64,
+        max_length=settings.LENGTH_64,
         unique=True,
-        help_text='Идентификатор страницы для URL;'
-        ' разрешены символы латиницы, цифры, дефис и подчёркивание.',
+        help_text=('Идентификатор страницы для URL; разрешены'
+                   ' символы латиницы, цифры, дефис и подчёркивание.'),
         blank=False)
 
     class Meta:
@@ -36,13 +38,13 @@ class Category(BaseModel):
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return self.title
+        return self.title[:settings.LENGTH_15]
 
 
-class Location(BaseModel):
+class Location(AbstractPublishableModel):
     name = models.CharField(
         verbose_name='Название места',
-        max_length=256,
+        max_length=settings.LENGTH_256,
         blank=False)
 
     class Meta:
@@ -53,18 +55,18 @@ class Location(BaseModel):
         return self.name
 
 
-class Post(BaseModel):
+class Post(AbstractPublishableModel):
     title = models.CharField(
         verbose_name='Заголовок',
-        max_length=256,
+        max_length=settings.LENGTH_256,
         blank=False)
     text = models.TextField(
         verbose_name='Текст',
         blank=False)
     pub_date = models.DateTimeField(
         'Дата и время публикации',
-        help_text='Если установить дату и время в будущем —'
-        ' можно делать отложенные публикации.',
+        help_text=('Если установить дату и время в будущем —'
+                   ' можно делать отложенные публикации.'),
         blank=False)
     author = models.ForeignKey(
         User,
@@ -75,14 +77,14 @@ class Post(BaseModel):
         Location,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='post',
+        related_name='location_posts',
         verbose_name='Местоположение',
         blank=True)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='post',
+        related_name='category_posts',
         verbose_name='Категория',
         blank=False)
 
@@ -91,4 +93,4 @@ class Post(BaseModel):
         verbose_name_plural = 'Публикации'
 
     def __str__(self):
-        return self.title
+        return self.title[:settings.LENGHT_15]

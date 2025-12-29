@@ -1,16 +1,15 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+
 from blog.models import Category, Post
+from .utils import get_published_posts
+
+SORT_BY_PUB_DATE = '-pub_date'
 
 
 def index(request):
-    posts = Post.objects.select_related('category').filter(
-        # Проверяем, что
-        pub_date__lt=timezone.now(),  # Дата — не позже текущего времени;
-        is_published=True,  # Пост разрешён к публикации;
-        category__is_published=True  # Категория разрешена к публикации.
-    ).order_by('-pub_date')[:5]
+    posts = get_published_posts().order_by(SORT_BY_PUB_DATE)[:5]
     context = {'post_list': posts}
     return render(request, 'blog/index.html', context)
 
@@ -29,11 +28,6 @@ def category_posts(request, category_slug):
     category = get_object_or_404(Category, slug=category_slug)
     if not category.is_published:
         raise Http404("Категория не опубликована")
-    posts = Post.objects.select_related('category').filter(
-        # Проверяем, что
-        category__slug=category_slug,
-        pub_date__lt=timezone.now(),  # Дата — не позже текущего времени;
-        is_published=True,  # Пост разрешён к публикации;
-    )
+    posts = get_published_posts(category_slug)
     context = {'post_list': posts, 'category': category}
     return render(request, 'blog/category.html', context)
