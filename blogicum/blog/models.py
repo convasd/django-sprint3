@@ -77,14 +77,14 @@ class Post(AbstractPublishableModel):
         Location,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='location_posts',
+        related_name='posts',
         verbose_name='Местоположение',
         blank=True)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='category_posts',
+        related_name='posts',
         verbose_name='Категория',
         blank=False)
 
