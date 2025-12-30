@@ -5,11 +5,11 @@ from django.utils import timezone
 from blog.models import Category, Post
 from .utils import get_published_posts
 
-SORT_BY_PUB_DATE = '-pub_date'
+COUNT_LAST_POSTS = 5
 
 
 def index(request):
-    posts = get_published_posts().order_by(SORT_BY_PUB_DATE)[:5]
+    posts = get_published_posts().order_by('-pub_date')[:COUNT_LAST_POSTS]
     context = {'post_list': posts}
     return render(request, 'blog/index.html', context)
 
